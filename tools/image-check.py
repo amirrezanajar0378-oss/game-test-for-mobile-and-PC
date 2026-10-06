@@ -1,14 +1,16 @@
 from pathlib import Path
-import imghdr
 
 ROOT = Path(__file__).resolve().parents[1]
-SUPPORTED = {"jpeg", "png", "webp", "avif"}
+required = [
+    ROOT / "index.html",
+    ROOT / "style.css",
+    ROOT / "src" / "app.ts",
+    ROOT / "src" / "utils.ts",
+    ROOT / "src" / "types.ts",
+]
 
-files = list((ROOT / "src").glob("**/*.ts"))
-print(f"TinyPix source check: {len(files)} TypeScript file(s)")
+missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
+if missing:
+    raise SystemExit("Missing required files: " + ", ".join(missing))
 
-for path in files:
-    if path.stat().st_size == 0:
-        raise SystemExit(f"Empty source file: {path}")
-
-print("Python check passed.")
+print(f"TinyPix project check passed: {len(required)} required files found.")
