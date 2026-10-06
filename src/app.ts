@@ -163,24 +163,23 @@ async function decode(file: File): Promise<DecodedImage> {
     }
   }
 
-  fallbackDecodeUrl = URL.createObjectURL(file);
+  const objectUrl = URL.createObjectURL(file);
+  fallbackDecodeUrl = objectUrl;
 
   return await new Promise((resolve, reject) => {
     const image = new Image();
 
     image.onload = () => {
-      if (fallbackDecodeUrl === fallbackDecodeUrl) {
-        URL.revokeObjectURL(fallbackDecodeUrl);
-        fallbackDecodeUrl = null;
-      }
+      URL.revokeObjectURL(objectUrl);
+      if (fallbackDecodeUrl === objectUrl) fallbackDecodeUrl = null;
       resolve(image);
     };
     image.onerror = () => {
-      URL.revokeObjectURL(fallbackDecodeUrl!);
-      fallbackDecodeUrl = null;
+      URL.revokeObjectURL(objectUrl);
+      if (fallbackDecodeUrl === objectUrl) fallbackDecodeUrl = null;
       reject(new Error("IMAGE_DECODE_FAILED"));
     };
-    image.src = fallbackDecodeUrl!;
+    image.src = objectUrl;
   });
 }
 
