@@ -269,8 +269,8 @@ async function compress() {
 downloadBtn.onclick = () => {
   if (!outputBlob || !outputUrl || !sourceFile) return;
 
-  const ext = extension(outputBlob.type);
-  const base = name.replace(/[^a-z0-9._-]/gi, "_")sourceFile.name.replace(/\.[^.]+$/, ""));
+  const ext = outputExtension(outputBlob.type);
+  const base = sourceFile.name.replace(/\.[^.]+$/, "").replace(/[^a-z0-9._-]/gi, "_");
   const link = document.createElement("a");
 
   link.href = outputUrl;
