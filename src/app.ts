@@ -27,6 +27,11 @@ let sourceUrl = null;
 let fallbackDecodeUrl = null;
 let compressionId = 0;
 
+type DecodedImage = ImageBitmap | HTMLImageElement;
+
+function closeDecodedImage(image: DecodedImage) {
+  if ("close" in image) image.close();
+}
 
 function revokeUrls() {
   if (sourceUrl) URL.revokeObjectURL(sourceUrl);
@@ -55,7 +60,7 @@ newBtn.onclick = reset;
 
 dropzone.onclick = () => input.click();
 
-dropzone.onkeydown = (event) => {
+dropzone.onkeydown = (event: KeyboardEvent) => {
   if (event.key === "Enter" || event.key === " ") {
     event.preventDefault();
     input.click();
@@ -63,7 +68,7 @@ dropzone.onkeydown = (event) => {
 };
 
 ["dragenter", "dragover"].forEach((eventName) => {
-  dropzone.addEventListener(eventName, (event) => {
+  dropzone.addEventListener(eventName, (event: DragEvent) => {
     event.preventDefault();
     dropzone.classList.add("drag");
   });
@@ -76,13 +81,14 @@ dropzone.onkeydown = (event) => {
   });
 });
 
-dropzone.addEventListener("drop", (event) => {
+dropzone.addEventListener("drop", (event: DragEvent) => {
   const file = event.dataTransfer.files && event.dataTransfer.files[0];
   if (file) loadFile(file);
 });
 
-input.onchange = (event) => {
-  const file = event.target.files && event.target.files[0];
+input.onchange = (event: Event) => {
+  const target = event.currentTarget as HTMLInputElement;
+  const file = target.files && target.files[0];
   if (file) loadFile(file);
 };
 
@@ -145,7 +151,7 @@ function chooseMime(): OutputMime {
   return (format.value === "auto" ? "image/webp" : format.value) as OutputMime;
 }
 
-async function decode(file) {
+async function decode(file: File): Promise<DecodedImage> {
   if ("createImageBitmap" in window) {
     try {
       return await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -165,13 +171,13 @@ async function decode(file) {
   });
 }
 
-function canvasBlob(canvas, mime, qualityValue) {
+function canvasBlob(canvas: HTMLCanvasElement, mime: OutputMime, qualityValue?: number): Promise<Blob | null> {
   return new Promise((resolve) => {
     canvas.toBlob(resolve, mime, qualityValue);
   });
 }
 
-async function compress() {
+async function compress(): Promise<void> {
   if (!sourceFile) return;
 
   const currentId = ++compressionId;
@@ -193,7 +199,7 @@ async function compress() {
   }
 
   if (currentId !== compressionId || file !== sourceFile) {
-    if (image.close) image.close();
+    closeDecodedImage(image);
     return;
   }
 
@@ -206,7 +212,7 @@ async function compress() {
   const ctx = canvas.getContext("2d", { alpha: true });
 
   if (!ctx) {
-    if (image.close) image.close();
+    closeDecodedImage(image);
     saving.textContent = "خطا در ساخت تصویر";
     savingText.textContent = "مرورگر نتوانست بوم تصویر را ایجاد کند.";
     return;
@@ -230,7 +236,7 @@ async function compress() {
     mime === "image/png" ? undefined : q
   );
 
-  if (image.close) image.close();
+  closeDecodedImage(image);
 
   if (!blob || currentId !== compressionId || file !== sourceFile) return;
 
