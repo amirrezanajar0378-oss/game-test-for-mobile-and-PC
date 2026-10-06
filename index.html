@@ -3,75 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5f5f7">
-<meta name="description" content="TinyPix — فشرده‌سازی تصویر با کنترل کامل، بدون آپلود به سرور">
-<title>کم‌حجم‌ساز | TinyPix</title>
+<meta name="theme-color" content="#f4f7ff">
+<meta name="description" content="TinyPix — فشرده‌ساز تصویر سریع، خصوصی و حرفه‌ای">
+<title>TinyPix — فشرده‌ساز تصویر</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="aurora"></div><div class="grain"></div>
-<main class="app">
-<header class="hero glass">
-  <div class="brand"><div class="logo">T</div><div><h1>کم‌حجم‌ساز <span>TinyPix</span></h1><p>فشرده‌سازی سریع، خصوصی و کاملاً قابل تنظیم.</p></div></div>
-  <div class="privacy"><i></i> فقط روی دستگاه شما</div>
+<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
+<div class="cursor-glow"></div>
+<main class="shell">
+<header class="topbar glass">
+  <a class="brand" href="#" aria-label="TinyPix">
+    <span class="logo"><span>T</span></span><span><strong>TinyPix</strong><small data-i18n="brandSub">فشرده‌ساز هوشمند تصویر</small></span>
+  </a>
+  <div class="top-actions">
+    <button id="themeBtn" class="icon-btn" aria-label="تغییر حالت">☼</button>
+    <label class="language"><span>文</span><select id="language" aria-label="Language">
+      <option value="fa">فارسی</option><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option><option value="es">Español</option><option value="fr">Français</option>
+    </select></label>
+    <a class="github-btn" href="https://github.com/amirrezanajar0378-oss/game-test-for-mobile-and-PC" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
 </header>
 
-<section id="dropzone" class="dropzone glass" tabindex="0" role="button" aria-label="انتخاب تصویر">
+<section class="hero">
+  <div class="hero-copy">
+    <div class="pill"><i></i><span data-i18n="localBadge">۱۰۰٪ پردازش روی دستگاه شما</span></div>
+    <h1><span data-i18n="heroLine1">تصویر کوچک‌تر.</span><br><em data-i18n="heroLine2">کیفیت، بزرگ‌تر.</em></h1>
+    <p data-i18n="heroDesc">TinyPix یک تجربه مدرن برای کم‌حجم‌کردن عکس‌هاست؛ سریع، خصوصی و با کنترل دقیق روی کیفیت و ابعاد.</p>
+    <div class="hero-actions">
+      <button id="heroChoose" class="primary-btn"><span>↑</span><b data-i18n="choose">انتخاب تصویر</b></button>
+      <button id="heroDemo" class="secondary-btn" data-i18n="how">چطور کار می‌کند؟</button>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div>
+    <div class="floating-card fc-1"><span>JPG</span><b>4.8 MB</b></div>
+    <div class="floating-card fc-2"><span>WebP</span><b>1.2 MB</b><i>−75%</i></div>
+    <div class="glass-device"><div class="device-top"></div><div class="device-photo"></div><div class="device-bar"></div></div>
+  </div>
+</section>
+
+<section id="upload" class="upload glass">
   <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
-  <div class="upload-icon"><span>↑</span></div>
-  <h2>عکس را رها کن</h2><p>یا برای انتخاب فایل ضربه بزن</p>
-  <div class="formats"><span>JPG</span><span>PNG</span><span>WebP</span><span>AVIF</span></div>
-  <small>تا 100MB • پردازش 100٪ داخل مرورگر</small>
+  <div class="upload-ring"><span>↑</span></div>
+  <h2 data-i18n="dropTitle">عکس را اینجا رها کن</h2>
+  <p data-i18n="dropDesc">یا کلیک کن و از دستگاهت یک تصویر انتخاب کن</p>
+  <div class="formats"><span>JPG</span><span>PNG</span><span>WEBP</span><span>AVIF</span></div>
+  <small data-i18n="dropNote">حداکثر 100MB • بدون آپلود به سرور • کاملاً رایگان</small>
+  <div class="upload-shine"></div>
+</section>
+
+<section class="feature-strip">
+  <article class="mini-card glass"><b>⚡</b><div><strong data-i18n="fast">فوق‌سریع</strong><span data-i18n="fastSub">پردازش مستقیم با Canvas</span></div></article>
+  <article class="mini-card glass"><b>🔒</b><div><strong data-i18n="private">خصوصی</strong><span data-i18n="privateSub">فایل از دستگاه خارج نمی‌شود</span></div></article>
+  <article class="mini-card glass"><b>🎛</b><div><strong data-i18n="control">کنترل کامل</strong><span data-i18n="controlSub">کیفیت، فرمت و اندازه</span></div></article>
+  <article class="mini-card glass"><b>🌍</b><div><strong data-i18n="multi">چندزبانه</strong><span data-i18n="multiSub">۶ زبان برای رابط کاربری</span></div></article>
 </section>
 
 <section id="workspace" class="workspace hidden">
-  <div class="toolbar glass">
-    <button id="newBtn" class="glass-button">＋ عکس جدید</button>
-    <div class="stats" id="inputStats"></div>
+  <div class="workspace-head glass">
+    <div><span class="eyebrow" data-i18n="workspaceEyebrow">WORKSPACE</span><h2 data-i18n="workspaceTitle">استودیو فشرده‌سازی</h2></div>
+    <button id="newBtn" class="secondary-btn">＋ <span data-i18n="newImage">تصویر جدید</span></button>
+  </div>
+
+  <div class="preset-row">
+    <button class="preset active" data-preset="balanced"><b>✨</b><span data-i18n="presetBalanced">متعادل</span><small>92%</small></button>
+    <button class="preset" data-preset="web"><b>🚀</b><span data-i18n="presetWeb">وب</span><small>80%</small></button>
+    <button class="preset" data-preset="small"><b>📦</b><span data-i18n="presetSmall">کم‌حجم</span><small>65%</small></button>
+    <button class="preset" data-preset="quality"><b>💎</b><span data-i18n="presetQuality">کیفیت بالا</span><small>98%</small></button>
   </div>
 
   <div class="settings glass">
-    <div class="setting wide">
-      <div class="setting-title"><label for="quality">کیفیت خروجی</label><b id="qualityValue">92%</b></div>
+    <div class="setting quality-setting">
+      <div class="setting-title"><label for="quality" data-i18n="quality">کیفیت خروجی</label><strong id="qualityValue">92%</strong></div>
       <input id="quality" type="range" min="10" max="100" value="92">
-      <div class="range-labels"><span>فشرده‌تر</span><span>حداکثر کیفیت</span></div>
+      <div class="range-labels"><span data-i18n="smaller">حجم کمتر</span><span data-i18n="better">کیفیت بیشتر</span></div>
     </div>
-    <div class="setting">
-      <label for="format">فرمت خروجی</label>
-      <select id="format"><option value="auto">خودکار — WebP</option><option value="image/webp">WebP</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option></select>
-    </div>
-    <div class="setting">
-      <label for="scale">اندازه تصویر</label>
-      <select id="scale"><option value="1">100٪ — اصلی</option><option value=".75">75٪</option><option value=".5">50٪</option><option value=".25">25٪</option></select>
-    </div>
-    <div class="setting wide custom-row">
-      <label for="maxWidth">حداکثر عرض <span>اختیاری</span></label>
-      <div class="number-wrap"><input id="maxWidth" type="number" min="64" max="12000" placeholder="مثلاً 1920"><span>px</span></div>
-      <small>نسبت تصویر خودکار حفظ می‌شود.</small>
-    </div>
+    <div class="setting"><label for="format" data-i18n="format">فرمت خروجی</label><select id="format"><option value="auto">Auto — WebP</option><option value="image/webp">WebP</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option></select></div>
+    <div class="setting"><label for="scale" data-i18n="scale">مقیاس تصویر</label><select id="scale"><option value="1">100% — اصلی</option><option value=".75">75%</option><option value=".5">50%</option><option value=".25">25%</option></select></div>
+    <div class="setting custom"><label for="maxWidth" data-i18n="maxWidth">حداکثر عرض</label><div class="input-wrap"><input id="maxWidth" type="number" min="64" max="12000" placeholder="1920"><span>px</span></div></div>
   </div>
 
-  <div class="preview-grid">
-    <div class="preview-card glass"><div class="card-head"><span>اصلی</span><span id="beforeSize"></span></div><div class="image-wrap"><img id="beforeImage" alt="تصویر اصلی"></div></div>
-    <div class="preview-card glass"><div class="card-head"><span>خروجی</span><span id="afterSize">—</span></div><div class="image-wrap"><img id="afterImage" alt="تصویر فشرده‌شده"></div></div>
+  <div class="compare">
+    <article class="preview glass"><header><span data-i18n="original">اصلی</span><b id="beforeSize">—</b></header><div class="checker"><img id="beforeImage" alt=""></div><footer><span id="beforeMeta">—</span></footer></article>
+    <article class="preview glass output-preview"><header><span data-i18n="output">خروجی</span><b id="afterSize">—</b></header><div class="checker"><img id="afterImage" alt=""></div><footer><span id="afterMeta">Live Preview</span><i id="statusDot"></i></footer></article>
   </div>
 
-  <div id="result" class="result glass-dark">
-    <div class="result-main"><strong id="saving">آماده فشرده‌سازی</strong><span id="savingText">هر تغییری را زنده ببین.</span></div>
-    <button id="downloadBtn" class="download" disabled>دانلود عکس <span>↓</span></button>
+  <div class="result glass-dark">
+    <div class="result-metric"><strong id="saving">آماده</strong><span id="savingText" data-i18n="live">هر تغییر را زنده ببین.</span></div>
+    <div class="result-stats"><div><span data-i18n="from">از</span><b id="fromSize">—</b></div><div><span data-i18n="to">به</span><b id="toSize">—</b></div><div><span data-i18n="saved">صرفه‌جویی</span><b id="savedSize">—</b></div></div>
+    <button id="downloadBtn" class="download" disabled><span data-i18n="download">دانلود تصویر</span><b>↓</b></button>
   </div>
 </section>
+
+<section class="story glass">
+  <div class="story-icon">🫧</div><div><span class="eyebrow">TINyPIX / PRIVACY FIRST</span><h2 data-i18n="storyTitle">سادگیِ یک ابزار حرفه‌ای</h2><p data-i18n="storyDesc">هیچ حساب کاربری، صف آپلود یا سرور پردازش لازم نیست. مرورگرت تصویر را همان‌جا پردازش می‌کند.</p></div>
+  <div class="story-stat"><strong>0</strong><span data-i18n="uploads">آپلود سرور</span></div>
+</section>
+
 <section class="about glass">
-  <div class="about-orb"></div>
-  <div class="about-copy">
-    <span class="eyebrow">TinyPix • Made with care</span>
-    <h2>ارتباط با ما 👋</h2>
-    <p>ایده، پیشنهاد یا گزارش مشکل داری؟ از صفحه گیت‌هاب پروژه با سازنده در ارتباط باش.</p>
-    <div class="creator"><div class="creator-avatar">A</div><div><strong>امیررضا نجار نوقابی</strong><span>سازنده TinyPix</span></div></div>
-  </div>
-  <a class="contact-button" href="https://github.com/amirrezanajar0378-oss/game-test-for-mobile-and-PC" target="_blank" rel="noopener">صفحه پروژه <span>↗</span></a>
+  <div><span class="eyebrow" data-i18n="aboutEyebrow">MADE BY AMIRREZA</span><h2 data-i18n="contactTitle">ارتباط با سازنده 👋</h2><p data-i18n="contactDesc">ایده، پیشنهاد یا گزارش باگ داری؟ از صفحه پروژه با من در ارتباط باش.</p><div class="creator"><span>A</span><div><strong>امیررضا نجار نوقابی</strong><small data-i18n="creator">سازنده TinyPix</small></div></div></div>
+  <a class="contact-button" href="https://github.com/amirrezanajar0378-oss/game-test-for-mobile-and-PC" target="_blank" rel="noopener"><span data-i18n="project">صفحه پروژه</span> ↗</a>
 </section>
-<footer><span>⚡ سریع</span><span>•</span><span>🔐 خصوصی</span><span>•</span><span>🎛 کنترل کامل</span><span>•</span><span>© TinyPix</span></footer>
+
+<footer><strong>TinyPix</strong><span>•</span><span data-i18n="footer1">ساخته‌شده با ❤️</span><span>•</span><span>© 2026</span><span>•</span><a href="https://github.com/amirrezanajar0378-oss/game-test-for-mobile-and-PC" target="_blank">GitHub</a></footer>
 </main>
 <script type="module" src="app.js"></script>
-</body></html>
+</body>
+</html>
