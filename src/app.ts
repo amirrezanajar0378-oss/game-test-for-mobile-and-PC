@@ -85,10 +85,6 @@ dropzone.addEventListener("dragleave", (event: DragEvent) => {
 dropzone.addEventListener("drop", (event: DragEvent) => {
   event.preventDefault();
   dropzone.classList.remove("drag");
-});
-
-dropzone.addEventListener("drop", (event: DragEvent) => {
-  event.preventDefault();
   const file = event.dataTransfer?.files?.[0];
   if (file) loadFile(file);
 });
@@ -108,7 +104,7 @@ format.onchange = () => {
   if (sourceFile) compress();
 };
 
-function isSupportedImage(file) {
+function isSupportedImage(file: File): boolean {
   return [
     "image/jpeg",
     "image/png",
@@ -117,7 +113,7 @@ function isSupportedImage(file) {
   ].includes(file.type);
 }
 
-async function loadFile(file) {
+async function loadFile(file: File): Promise<void> {
   if (!isSupportedImage(file)) {
     alert("لطفاً یک فایل JPG، PNG، WebP یا AVIF انتخاب کن.");
     return;
@@ -194,7 +190,7 @@ async function compress(): Promise<void> {
   saving.textContent = "در حال فشرده‌سازی…";
   savingText.textContent = "";
 
-  let image;
+  let image: DecodedImage;
 
   try {
     image = await decode(file);
