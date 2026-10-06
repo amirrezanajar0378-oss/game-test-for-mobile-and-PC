@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7c3aed"><meta name="description" content="کم‌حجم‌سازی هوشمند عکس بدون آپلود به سرور">
+<title>کم‌حجم‌ساز | TinyPix</title><link rel="stylesheet" href="style.css">
+</head>
+<body><div class="bg"></div><main class="app">
+<header class="hero"><div class="logo">T</div><div><h1>کم‌حجم‌ساز <span>TinyPix</span></h1><p>حجم عکس را کم کن، بدون اینکه کیفیت ظاهری خراب شود.</p></div><div class="privacy">🔒 پردازش داخل مرورگر</div></header>
+<section id="dropzone" class="dropzone" tabindex="0" role="button"><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden><div class="upload-icon">↥</div><h2>عکس را اینجا بکش و رها کن</h2><p>یا برای انتخاب فایل کلیک کن</p><small>JPG · PNG · WebP · AVIF</small></section>
+<section id="workspace" class="workspace hidden"><div class="toolbar"><button id="newBtn" class="ghost">＋ عکس جدید</button><div class="stats" id="inputStats"></div></div>
+<div class="settings"><div class="setting"><label for="quality">کیفیت خروجی <b id="qualityValue">92%</b></label><input id="quality" type="range" min="60" max="100" value="92"><div class="range-labels"><span>حجم کمتر</span><span>کیفیت بیشتر</span></div></div>
+<div class="setting"><label for="format">فرمت خروجی</label><select id="format"><option value="auto">بهترین فرمت (پیشنهادی)</option><option value="image/webp">WebP</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option></select></div></div>
+<div class="preview-grid"><div class="preview-card"><div class="card-head"><span>اصلی</span><span id="beforeSize"></span></div><div class="image-wrap"><img id="beforeImage" alt="تصویر اصلی"></div></div>
+<div class="preview-card"><div class="card-head"><span>فشرده‌شده</span><span id="afterSize">—</span></div><div class="image-wrap"><img id="afterImage" alt="تصویر فشرده‌شده"></div></div></div>
+<div id="result" class="result"><div class="result-main"><strong id="saving">آماده فشرده‌سازی</strong><span id="savingText">کیفیت را انتخاب کن؛ پردازش روی دستگاه خودت انجام می‌شود.</span></div><button id="downloadBtn" class="download" disabled>⬇ دانلود عکس</button></div></section>
+<footer><span>⚡ سریع و رایگان</span><span>•</span><span>🔐 بدون آپلود عکس</span><span>•</span><span>برای عکس‌های شخصی هم مناسب</span></footer></main><script src="app.js"></script></body></html>
