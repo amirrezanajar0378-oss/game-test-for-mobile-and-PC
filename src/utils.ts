@@ -20,5 +20,6 @@ export function percentageSaved(original: number, output: number): number {
 export function outputExtension(mime: string): string {
   if (mime === "image/png") return "png";
   if (mime === "image/jpeg") return "jpg";
+  if (mime === "image/avif") return "avif";
   return "webp";
 }
