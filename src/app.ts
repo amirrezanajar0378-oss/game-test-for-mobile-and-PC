@@ -1,76 +1,75 @@
 import { formatBytes, percentageSaved, outputExtension } from "./utils.js";
 import type { OutputMime, CompressionResult } from "./types.js";
 
-const $ = <T extends Element>(s:string) => document.querySelector(s) as T;
-const dropzone=$("#dropzone") as HTMLElement, input=$("#fileInput") as HTMLInputElement;
-const workspace=$("#workspace") as HTMLElement, quality=$("#quality") as HTMLInputElement;
-const format=$("#format") as HTMLSelectElement, scale=$("#scale") as HTMLSelectElement;
-const maxWidth=$("#maxWidth") as HTMLInputElement;
-const beforeImage=$("#beforeImage") as HTMLImageElement, afterImage=$("#afterImage") as HTMLImageElement;
-const beforeSize=$("#beforeSize") as HTMLElement, afterSize=$("#afterSize") as HTMLElement;
-const qualityValue=$("#qualityValue") as HTMLElement, saving=$("#saving") as HTMLElement;
-const savingText=$("#savingText") as HTMLElement, downloadBtn=$("#downloadBtn") as HTMLButtonElement;
-const inputStats=$("#inputStats") as HTMLElement, newBtn=$("#newBtn") as HTMLButtonElement;
+const $=<T extends Element>(s:string)=>document.querySelector(s) as T;
+const dropzone=$(".upload") as HTMLElement,input=$("#fileInput") as HTMLInputElement,workspace=$("#workspace") as HTMLElement;
+const quality=$("#quality") as HTMLInputElement,format=$("#format") as HTMLSelectElement,scale=$("#scale") as HTMLSelectElement,maxWidth=$("#maxWidth") as HTMLInputElement;
+const beforeImage=$("#beforeImage") as HTMLImageElement,afterImage=$("#afterImage") as HTMLImageElement,beforeSize=$("#beforeSize") as HTMLElement,afterSize=$("#afterSize") as HTMLElement;
+const beforeMeta=$("#beforeMeta") as HTMLElement,afterMeta=$("#afterMeta") as HTMLElement,qualityValue=$("#qualityValue") as HTMLElement,saving=$("#saving") as HTMLElement,savingText=$("#savingText") as HTMLElement;
+const fromSize=$("#fromSize") as HTMLElement,toSize=$("#toSize") as HTMLElement,savedSize=$("#savedSize") as HTMLElement,downloadBtn=$("#downloadBtn") as HTMLButtonElement,newBtn=$("#newBtn") as HTMLButtonElement;
+const statusDot=$("#statusDot") as HTMLElement,language=$("#language") as HTMLSelectElement,themeBtn=$("#themeBtn") as HTMLButtonElement;
 
-let sourceFile:File|null=null, outputBlob:Blob|null=null, outputUrl:string|null=null, sourceUrl:string|null=null, fallbackDecodeUrl:string|null=null;
-let compressionId=0;
-
+let sourceFile:File|null=null,outputBlob:Blob|null=null,outputUrl:string|null=null,sourceUrl:string|null=null,fallbackDecodeUrl:string|null=null,compressionId=0;
 type DecodedImage=ImageBitmap|HTMLImageElement;
-function closeDecodedImage(image:DecodedImage){if("close" in image) image.close();}
-function revokeUrls(){if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(outputUrl)URL.revokeObjectURL(outputUrl);if(fallbackDecodeUrl)URL.revokeObjectURL(fallbackDecodeUrl);sourceUrl=outputUrl=fallbackDecodeUrl=null;}
-function reset(){compressionId++;sourceFile=null;outputBlob=null;downloadBtn.disabled=true;workspace.classList.add("hidden");dropzone.classList.remove("hidden");revokeUrls();beforeImage.removeAttribute("src");afterImage.removeAttribute("src");input.value="";}
-newBtn.onclick=reset;
-dropzone.onclick=()=>input.click();
-dropzone.onkeydown=(e:KeyboardEvent)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();input.click();}};
-for(const name of ["dragenter","dragover"]){dropzone.addEventListener(name,(e:Event)=>{e.preventDefault();dropzone.classList.add("drag");});}
-dropzone.addEventListener("dragleave",(e:DragEvent)=>{e.preventDefault();dropzone.classList.remove("drag");});
-dropzone.addEventListener("drop",(e:DragEvent)=>{e.preventDefault();dropzone.classList.remove("drag");const file=e.dataTransfer?.files?.[0];if(file)loadFile(file);});
-input.onchange=(e:Event)=>{const file=(e.currentTarget as HTMLInputElement).files?.[0];if(file)loadFile(file);};
-quality.oninput=()=>{qualityValue.textContent=quality.value+"%";if(sourceFile)compress();};
-format.onchange=()=>{if(sourceFile)compress();};
-scale.onchange=()=>{if(sourceFile)compress();};
-maxWidth.oninput=()=>{if(sourceFile)compress();};
 
-function isSupportedImage(file:File){return ["image/jpeg","image/png","image/webp","image/avif"].includes(file.type);}
-async function loadFile(file:File):Promise<void>{
- if(!isSupportedImage(file)){alert("لطفاً یک فایل JPG، PNG، WebP یا AVIF انتخاب کن.");return;}
- if(file.size>100*1024*1024){alert("برای عملکرد بهتر، عکس‌های زیر 100MB را انتخاب کن.");return;}
+const tr:Record<string,Record<string,string>>={
+fa:{brandSub:"فشرده‌ساز هوشمند تصویر",localBadge:"۱۰۰٪ پردازش روی دستگاه شما",heroLine1:"تصویر کوچک‌تر.",heroLine2:"کیفیت، بزرگ‌تر.",heroDesc:"TinyPix یک تجربه مدرن برای کم‌حجم‌کردن عکس‌هاست؛ سریع، خصوصی و با کنترل دقیق روی کیفیت و ابعاد.",choose:"انتخاب تصویر",how:"چطور کار می‌کند؟",dropTitle:"عکس را اینجا رها کن",dropDesc:"یا کلیک کن و از دستگاهت یک تصویر انتخاب کن",dropNote:"حداکثر 100MB • بدون آپلود به سرور • کاملاً رایگان",fast:"فوق‌سریع",fastSub:"پردازش مستقیم با Canvas",private:"خصوصی",privateSub:"فایل از دستگاه خارج نمی‌شود",control:"کنترل کامل",controlSub:"کیفیت، فرمت و اندازه",multi:"چندزبانه",multiSub:"۶ زبان برای رابط کاربری",workspaceEyebrow:"WORKSPACE",workspaceTitle:"استودیو فشرده‌سازی",newImage:"تصویر جدید",presetBalanced:"متعادل",presetWeb:"وب",presetSmall:"کم‌حجم",presetQuality:"کیفیت بالا",quality:"کیفیت خروجی",smaller:"حجم کمتر",better:"کیفیت بیشتر",format:"فرمت خروجی",scale:"مقیاس تصویر",maxWidth:"حداکثر عرض",original:"اصلی",output:"خروجی",live:"هر تغییر را زنده ببین.",from:"از",to:"به",saved:"صرفه‌جویی",download:"دانلود تصویر",storyTitle:"سادگیِ یک ابزار حرفه‌ای",storyDesc:"هیچ حساب کاربری، صف آپلود یا سرور پردازش لازم نیست. مرورگرت تصویر را همان‌جا پردازش می‌کند.",uploads:"آپلود سرور",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"ارتباط با سازنده 👋",contactDesc:"ایده، پیشنهاد یا گزارش باگ داری؟ از صفحه پروژه با من در ارتباط باش.",creator:"سازنده TinyPix",project:"صفحه پروژه",footer1:"ساخته‌شده با ❤️"},
+en:{brandSub:"Smart image compressor",localBadge:"100% processed on your device",heroLine1:"Smaller images.",heroLine2:"Bigger quality.",heroDesc:"TinyPix is a modern image compression experience — fast, private, and precise.",choose:"Choose image",how:"How it works",dropTitle:"Drop your image here",dropDesc:"or click to choose a file",dropNote:"Up to 100MB • No server upload • Free",fast:"Ultra fast",fastSub:"Canvas-powered processing",private:"Private",privateSub:"Your file stays on-device",control:"Full control",controlSub:"Quality, format & size",multi:"Multilingual",multiSub:"6 interface languages",workspaceEyebrow:"WORKSPACE",workspaceTitle:"Compression Studio",newImage:"New image",presetBalanced:"Balanced",presetWeb:"Web",presetSmall:"Small",presetQuality:"High quality",quality:"Output quality",smaller:"Smaller",better:"Better quality",format:"Output format",scale:"Image scale",maxWidth:"Max width",original:"Original",output:"Output",live:"See every change live.",from:"From",to:"To",saved:"Saved",download:"Download image",storyTitle:"A professional tool, kept simple",storyDesc:"No account, upload queue, or processing server. Your browser processes the image locally.",uploads:"Server uploads",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"Contact the creator 👋",contactDesc:"Have an idea, suggestion, or bug report? Reach out through the project page.",creator:"TinyPix creator",project:"Project page",footer1:"Made with ❤️"},
+ar:{brandSub:"ضغط الصور بذكاء",localBadge:"معالجة 100٪ على جهازك",heroLine1:"صور أصغر.",heroLine2:"جودة أكبر.",heroDesc:"TinyPix تجربة حديثة لضغط الصور — سريعة، خاصة ودقيقة.",choose:"اختر صورة",how:"كيف يعمل؟",dropTitle:"أفلت الصورة هنا",dropDesc:"أو اضغط لاختيار ملف",dropNote:"حتى 100MB • بدون رفع للخادم • مجاني",fast:"سريع جداً",fastSub:"معالجة مباشرة",private:"خاص",privateSub:"الملف يبقى على جهازك",control:"تحكم كامل",controlSub:"الجودة والصيغة والحجم",multi:"متعدد اللغات",multiSub:"6 لغات للواجهة",workspaceEyebrow:"WORKSPACE",workspaceTitle:"استوديو الضغط",newImage:"صورة جديدة",presetBalanced:"متوازن",presetWeb:"للويب",presetSmall:"حجم صغير",presetQuality:"جودة عالية",quality:"جودة الإخراج",smaller:"حجم أقل",better:"جودة أعلى",format:"صيغة الإخراج",scale:"حجم الصورة",maxWidth:"أقصى عرض",original:"الأصل",output:"الإخراج",live:"شاهد كل تغيير مباشرة.",from:"من",to:"إلى",saved:"التوفير",download:"تنزيل الصورة",storyTitle:"أداة احترافية ببساطة",storyDesc:"لا حساب ولا خادم معالجة. متصفحك يعالج الصورة محلياً.",uploads:"رفع للخادم",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"تواصل مع المطور 👋",contactDesc:"لديك فكرة أو اقتراح؟ تواصل عبر صفحة المشروع.",creator:"مطور TinyPix",project:"صفحة المشروع",footer1:"صُنع بـ ❤️"},
+tr:{brandSub:"Akıllı görsel sıkıştırıcı",localBadge:"%100 cihazınızda işlenir",heroLine1:"Daha küçük.",heroLine2:"Daha kaliteli.",heroDesc:"TinyPix hızlı, özel ve hassas bir görsel sıkıştırma deneyimidir.",choose:"Görsel seç",how:"Nasıl çalışır?",dropTitle:"Görseli buraya bırak",dropDesc:"veya dosya seçmek için tıkla",dropNote:"100MB'a kadar • Sunucu yüklemesi yok • Ücretsiz",fast:"Ultra hızlı",fastSub:"Canvas ile işleme",private:"Gizli",privateSub:"Dosyan cihazında kalır",control:"Tam kontrol",controlSub:"Kalite, biçim ve boyut",multi:"Çok dilli",multiSub:"6 arayüz dili",workspaceEyebrow:"WORKSPACE",workspaceTitle:"Sıkıştırma Stüdyosu",newImage:"Yeni görsel",presetBalanced:"Dengeli",presetWeb:"Web",presetSmall:"Küçük",presetQuality:"Yüksek kalite",quality:"Çıkış kalitesi",smaller:"Daha küçük",better:"Daha kaliteli",format:"Çıkış biçimi",scale:"Görsel ölçeği",maxWidth:"Maksimum genişlik",original:"Orijinal",output:"Çıkış",live:"Her değişikliği canlı gör.",from:"Önce",to:"Sonra",saved:"Tasarruf",download:"Görseli indir",storyTitle:"Basit ama profesyonel",storyDesc:"Hesap veya sunucu gerekmez. Tarayıcın görseli yerel olarak işler.",uploads:"Sunucu yüklemesi",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"Geliştiriciyle iletişim 👋",contactDesc:"Fikrin veya hata raporun mu var? Proje sayfasından ulaş.",creator:"TinyPix geliştiricisi",project:"Proje sayfası",footer1:"❤️ ile yapıldı"},
+es:{brandSub:"Compresor de imágenes inteligente",localBadge:"Procesado 100% en tu dispositivo",heroLine1:"Imágenes más pequeñas.",heroLine2:"Mayor calidad.",heroDesc:"TinyPix ofrece una compresión moderna, rápida, privada y precisa.",choose:"Elegir imagen",how:"¿Cómo funciona?",dropTitle:"Suelta tu imagen aquí",dropDesc:"o haz clic para elegir un archivo",dropNote:"Hasta 100MB • Sin subir al servidor • Gratis",fast:"Ultrarrápido",fastSub:"Procesamiento con Canvas",private:"Privado",privateSub:"El archivo queda en tu dispositivo",control:"Control total",controlSub:"Calidad, formato y tamaño",multi:"Multilingüe",multiSub:"6 idiomas de interfaz",workspaceEyebrow:"WORKSPACE",workspaceTitle:"Estudio de compresión",newImage:"Nueva imagen",presetBalanced:"Equilibrado",presetWeb:"Web",presetSmall:"Pequeño",presetQuality:"Alta calidad",quality:"Calidad de salida",smaller:"Menor tamaño",better:"Mayor calidad",format:"Formato de salida",scale:"Escala",maxWidth:"Ancho máximo",original:"Original",output:"Salida",live:"Ve cada cambio en vivo.",from:"De",to:"A",saved:"Ahorro",download:"Descargar imagen",storyTitle:"Una herramienta profesional y simple",storyDesc:"Sin cuenta ni servidor. Tu navegador procesa la imagen localmente.",uploads:"Subidas al servidor",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"Contacta al creador 👋",contactDesc:"¿Tienes una idea o un error? Escríbenos desde la página del proyecto.",creator:"Creador de TinyPix",project:"Página del proyecto",footer1:"Hecho con ❤️"},
+fr:{brandSub:"Compresseur d’images intelligent",localBadge:"100 % traité sur votre appareil",heroLine1:"Des images plus petites.",heroLine2:"Une qualité plus grande.",heroDesc:"TinyPix offre une compression moderne, rapide, privée et précise.",choose:"Choisir une image",how:"Comment ça marche ?",dropTitle:"Déposez votre image ici",dropDesc:"ou cliquez pour choisir un fichier",dropNote:"Jusqu’à 100 Mo • Aucun envoi serveur • Gratuit",fast:"Ultra rapide",fastSub:"Traitement Canvas",private:"Privé",privateSub:"Le fichier reste sur l’appareil",control:"Contrôle total",controlSub:"Qualité, format et taille",multi:"Multilingue",multiSub:"6 langues d’interface",workspaceEyebrow:"WORKSPACE",workspaceTitle:"Studio de compression",newImage:"Nouvelle image",presetBalanced:"Équilibré",presetWeb:"Web",presetSmall:"Petit",presetQuality:"Haute qualité",quality:"Qualité de sortie",smaller:"Plus petit",better:"Meilleure qualité",format:"Format de sortie",scale:"Échelle",maxWidth:"Largeur max.",original:"Original",output:"Sortie",live:"Voyez chaque changement en direct.",from:"De",to:"À",saved:"Économie",download:"Télécharger",storyTitle:"Un outil professionnel, simplement",storyDesc:"Aucun compte ni serveur. Votre navigateur traite l’image localement.",uploads:"Envois serveur",aboutEyebrow:"MADE BY AMIRREZA",contactTitle:"Contacter le créateur 👋",contactDesc:"Une idée ou un bug ? Contactez-nous depuis la page du projet.",creator:"Créateur de TinyPix",project:"Page du projet",footer1:"Fait avec ❤️"}
+};
+
+function applyLanguage(lang:string){const d=tr[lang]||tr.en;document.documentElement.lang=lang;document.documentElement.dir=lang==="fa"||lang==="ar"?"rtl":"ltr";document.querySelectorAll<HTMLElement>("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(k&&d[k])el.textContent=d[k]});localStorage.setItem("tinypix-lang",lang)}
+language.value=localStorage.getItem("tinypix-lang")||"fa";applyLanguage(language.value);language.onchange=()=>applyLanguage(language.value);
+
+function applyTheme(dark:boolean){document.body.classList.toggle("dark",dark);themeBtn.textContent=dark?"☾":"☼";localStorage.setItem("tinypix-theme",dark?"dark":"light")}
+applyTheme(localStorage.getItem("tinypix-theme")==="dark");themeBtn.onclick=()=>applyTheme(!document.body.classList.contains("dark"));
+
+document.querySelector<HTMLElement>("#heroChoose")!.onclick=()=>input.click();
+document.querySelector<HTMLElement>("#heroDemo")!.onclick=()=>document.querySelector("#story")?.scrollIntoView({behavior:"smooth"});
+dropzone.onclick=()=>input.click();
+dropzone.onkeydown=(e:KeyboardEvent)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();input.click()}};
+for(const n of ["dragenter","dragover"])dropzone.addEventListener(n,e=>{e.preventDefault();dropzone.classList.add("drag")});
+for(const n of ["dragleave"])dropzone.addEventListener(n,e=>{e.preventDefault();dropzone.classList.remove("drag")});
+dropzone.addEventListener("drop",(e:DragEvent)=>{e.preventDefault();dropzone.classList.remove("drag");const f=e.dataTransfer?.files?.[0];if(f)loadFile(f)});
+input.onchange=()=>{const f=input.files?.[0];if(f)loadFile(f)};
+quality.oninput=()=>{qualityValue.textContent=quality.value+"%";if(sourceFile)compress()};
+format.onchange=()=>sourceFile&&compress();scale.onchange=()=>sourceFile&&compress();maxWidth.oninput=()=>sourceFile&&compress();
+
+document.querySelectorAll<HTMLButtonElement>(".preset").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));btn.classList.add("active");const p=btn.dataset.preset;const q=p==="web"?80:p==="small"?65:p==="quality"?98:92;quality.value=String(q);qualityValue.textContent=q+"%";if(p==="small")scale.value=".75";else if(p==="web")scale.value="1";else scale.value="1";if(sourceFile)compress()});
+
+document.addEventListener("pointermove",e=>{const g=document.querySelector<HTMLElement>(".cursor-glow");if(g){g.style.left=e.clientX+"px";g.style.top=e.clientY+"px"}});
+
+function closeDecodedImage(i:DecodedImage){if("close" in i)i.close()}
+function revokeUrls(){if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(outputUrl)URL.revokeObjectURL(outputUrl);if(fallbackDecodeUrl)URL.revokeObjectURL(fallbackDecodeUrl);sourceUrl=outputUrl=fallbackDecodeUrl=null}
+function reset(){compressionId++;sourceFile=null;outputBlob=null;downloadBtn.disabled=true;workspace.classList.add("hidden");dropzone.classList.remove("hidden");revokeUrls();beforeImage.removeAttribute("src");afterImage.removeAttribute("src");input.value="";saving.textContent="آماده";savingText.textContent="";beforeSize.textContent=afterSize.textContent=fromSize.textContent=toSize.textContent=savedSize.textContent="—"}
+newBtn.onclick=reset;
+function isSupportedImage(file:File){return ["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)}
+async function loadFile(file:File){
+ if(!isSupportedImage(file)){alert("JPG, PNG, WebP یا AVIF انتخاب کن.");return}
+ if(file.size>100*1024*1024){alert("حداکثر حجم فایل 100MB است.");return}
  compressionId++;sourceFile=file;outputBlob=null;downloadBtn.disabled=true;
- if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(outputUrl)URL.revokeObjectURL(outputUrl);if(fallbackDecodeUrl)URL.revokeObjectURL(fallbackDecodeUrl);
- outputUrl=fallbackDecodeUrl=null;sourceUrl=URL.createObjectURL(file);beforeImage.src=sourceUrl;
- beforeSize.textContent=formatBytes(file.size);inputStats.textContent=file.name+" • "+formatBytes(file.size);
- dropzone.classList.add("hidden");workspace.classList.remove("hidden");saving.textContent="در حال آماده‌سازی…";savingText.textContent="";await compress();
+ revokeUrls();sourceUrl=URL.createObjectURL(file);beforeImage.src=sourceUrl;beforeSize.textContent=formatBytes(file.size);fromSize.textContent=formatBytes(file.size);
+ beforeMeta.textContent=file.name;dropzone.classList.add("hidden");workspace.classList.remove("hidden");workspace.scrollIntoView({behavior:"smooth",block:"start"});await compress()
 }
-function chooseMime():OutputMime{return (format.value==="auto"?"image/webp":format.value) as OutputMime;}
+function chooseMime():OutputMime{return (format.value==="auto"?"image/webp":format.value) as OutputMime}
 async function decode(file:File):Promise<DecodedImage>{
- if("createImageBitmap" in window){try{return await createImageBitmap(file,{imageOrientation:"from-image"});}catch(_){}}
+ if("createImageBitmap" in window){try{return await createImageBitmap(file,{imageOrientation:"from-image"})}catch(_){}}
  const url=URL.createObjectURL(file);fallbackDecodeUrl=url;
- return await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{URL.revokeObjectURL(url);if(fallbackDecodeUrl===url)fallbackDecodeUrl=null;resolve(image);};image.onerror=()=>{URL.revokeObjectURL(url);if(fallbackDecodeUrl===url)fallbackDecodeUrl=null;reject(new Error("IMAGE_DECODE_FAILED"));};image.src=url;});
+ return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);if(fallbackDecodeUrl===url)fallbackDecodeUrl=null;resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);if(fallbackDecodeUrl===url)fallbackDecodeUrl=null;reject(new Error("decode"))};img.src=url})
 }
-function canvasBlob(canvas:HTMLCanvasElement,mime:OutputMime,q?:number):Promise<Blob|null>{return new Promise(resolve=>canvas.toBlob(resolve,mime,q));}
-async function compress():Promise<void>{
+function canvasBlob(c:HTMLCanvasElement,m:OutputMime,q?:number){return new Promise<Blob|null>(r=>c.toBlob(r,m,q))}
+async function compress(){
  if(!sourceFile)return;
- const currentId=++compressionId,file=sourceFile;downloadBtn.disabled=true;saving.textContent="در حال فشرده‌سازی…";savingText.textContent="";
- let image:DecodedImage;try{image=await decode(file);}catch(_){if(currentId!==compressionId)return;saving.textContent="پردازش تصویر انجام نشد";savingText.textContent="این فایل در مرورگر شما قابل پردازش نیست.";return;}
- if(currentId!==compressionId||file!==sourceFile){closeDecodedImage(image);return;}
- const originalWidth=image.width,originalHeight=image.height;
- let targetWidth=Math.max(1,Math.round(originalWidth*Number(scale.value)));
- const custom=Number(maxWidth.value);
- if(Number.isFinite(custom)&&custom>0)targetWidth=Math.min(targetWidth,Math.floor(custom));
- const targetHeight=Math.max(1,Math.round(originalHeight*(targetWidth/originalWidth)));
- const canvas=document.createElement("canvas");canvas.width=targetWidth;canvas.height=targetHeight;
- const ctx=canvas.getContext("2d",{alpha:true});if(!ctx){closeDecodedImage(image);saving.textContent="خطا در ساخت تصویر";return;}
- ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
- const mime=chooseMime(),q=Number(quality.value)/100;
- if(mime==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,targetWidth,targetHeight);}
- ctx.drawImage(image,0,0,targetWidth,targetHeight);let blob=await canvasBlob(canvas,mime,mime==="image/png"?undefined:q);closeDecodedImage(image);
- if(!blob||currentId!==compressionId||file!==sourceFile)return;
- if(blob.size>=file.size&&mime!=="image/png"&&targetWidth===originalWidth)blob=file;
- if(blob.size>=file.size&&mime==="image/png"&&targetWidth===originalWidth)blob=file;
- if(outputUrl)URL.revokeObjectURL(outputUrl);
- const result:CompressionResult={blob,width:targetWidth,height:targetHeight,savedPercent:percentageSaved(file.size,blob.size)};
- outputBlob=result.blob;outputUrl=URL.createObjectURL(result.blob);afterImage.src=outputUrl;afterSize.textContent=formatBytes(result.blob.size);
- if(result.blob.size<file.size){saving.textContent=result.savedPercent+"% حجم کمتر";savingText.textContent=formatBytes(file.size)+" → "+formatBytes(result.blob.size)+" • ابعاد "+targetWidth+"×"+targetHeight;}else{saving.textContent="خروجی آماده است";savingText.textContent=formatBytes(result.blob.size)+" • ابعاد "+targetWidth+"×"+targetHeight;}
- downloadBtn.disabled=false;
+ const id=++compressionId,file=sourceFile;downloadBtn.disabled=true;saving.textContent="Processing…";
+ let image:DecodedImage;try{image=await decode(file)}catch(_){if(id===compressionId){saving.textContent="Processing failed";savingText.textContent="This image cannot be decoded by your browser."}return}
+ if(id!==compressionId||file!==sourceFile){closeDecodedImage(image);return}
+ const ow=image.width,oh=image.height;let tw=Math.max(1,Math.round(ow*Number(scale.value)));const custom=Number(maxWidth.value);if(Number.isFinite(custom)&&custom>0)tw=Math.min(tw,Math.floor(custom));const th=Math.max(1,Math.round(oh*tw/ow));
+ const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;const ctx=canvas.getContext("2d",{alpha:true});if(!ctx){closeDecodedImage(image);return}ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";const mime=chooseMime(),q=Number(quality.value)/100;if(mime==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,tw,th)}ctx.drawImage(image,0,0,tw,th);
+ let blob=await canvasBlob(canvas,mime,mime==="image/png"?undefined:q);closeDecodedImage(image);if(!blob||id!==compressionId||file!==sourceFile)return;if(blob.size>=file.size&&tw===ow)blob=file;
+ if(outputUrl)URL.revokeObjectURL(outputUrl);outputBlob=blob;outputUrl=URL.createObjectURL(blob);afterImage.src=outputUrl;afterSize.textContent=formatBytes(blob.size);toSize.textContent=formatBytes(blob.size);afterMeta.textContent=tw+" × "+th+" px";statusDot.style.background="#34c759";
+ const saved=percentageSaved(file.size,blob.size);savedSize.textContent=saved+"%";saving.textContent=blob.size<file.size?saved+"% حجم کمتر":"خروجی آماده است";savingText.textContent=formatBytes(file.size)+" → "+formatBytes(blob.size)+" • "+tw+"×"+th+" px";downloadBtn.disabled=false
 }
-downloadBtn.onclick=()=>{if(!outputBlob||!outputUrl||!sourceFile)return;const ext=outputExtension(outputBlob.type),base=sourceFile.name.replace(/\.[^.]+$/,"").replace(/[^a-z0-9._-]/gi,"_"),link=document.createElement("a");link.href=outputUrl;link.download=base+"-tinypix."+ext;document.body.appendChild(link);link.click();link.remove();};
+downloadBtn.onclick=()=>{if(!outputBlob||!outputUrl||!sourceFile)return;const ext=outputExtension(outputBlob.type),base=sourceFile.name.replace(/\.[^.]+$/,"").replace(/[^a-z0-9._-]/gi,"_"),a=document.createElement("a");a.href=outputUrl;a.download=base+"-tinypix."+ext;document.body.appendChild(a);a.click();a.remove()};
