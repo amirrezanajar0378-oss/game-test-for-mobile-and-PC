@@ -168,8 +168,18 @@ async function decode(file: File): Promise<DecodedImage> {
   return await new Promise((resolve, reject) => {
     const image = new Image();
 
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("IMAGE_DECODE_FAILED"));
+    image.onload = () => {
+      if (fallbackDecodeUrl === fallbackDecodeUrl) {
+        URL.revokeObjectURL(fallbackDecodeUrl);
+        fallbackDecodeUrl = null;
+      }
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(fallbackDecodeUrl!);
+      fallbackDecodeUrl = null;
+      reject(new Error("IMAGE_DECODE_FAILED"));
+    };
     image.src = fallbackDecodeUrl!;
   });
 }
