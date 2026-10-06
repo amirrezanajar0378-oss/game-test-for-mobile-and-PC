@@ -251,17 +251,22 @@ async function compress(): Promise<void> {
 
   if (outputUrl) URL.revokeObjectURL(outputUrl);
 
-  outputBlob = blob;
-  outputUrl = URL.createObjectURL(blob);
+  const result: CompressionResult = {
+    blob,
+    width,
+    height,
+    savedPercent: percentageSaved(file.size, blob.size)
+  };
+
+  outputBlob = result.blob;
+  outputUrl = URL.createObjectURL(result.blob);
   afterImage.src = outputUrl;
-  afterSize.textContent = formatBytes(blob.size);
+  afterSize.textContent = formatBytes(result.blob.size);
 
-  const percent = percentageSaved(file.size, blob.size);
-
-  if (blob.size < file.size) {
-    saving.textContent = percent + "% حجم کمتر";
+  if (result.blob.size < file.size) {
+    saving.textContent = result.savedPercent + "% حجم کمتر";
     savingText.textContent =
-      formatBytes(file.size) + " → " + formatBytes(blob.size) +
+      formatBytes(file.size) + " → " + formatBytes(result.blob.size) +
       " • ابعاد " + width + "×" + height + " حفظ شد";
   } else {
     saving.textContent = "فایل اصلی بهتر است";
@@ -286,6 +291,3 @@ downloadBtn.onclick = () => {
   link.remove();
 };
 
-
-// Shared typed result model used by the compression pipeline.
-const _compressionResultTypeCheck = (result: CompressionResult): CompressionResult => result;
