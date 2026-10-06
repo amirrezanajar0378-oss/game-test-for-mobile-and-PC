@@ -20,11 +20,11 @@ const downloadBtn = $("#downloadBtn") as HTMLButtonElement;
 const inputStats = $("#inputStats") as HTMLElement;
 const newBtn = $("#newBtn") as HTMLButtonElement;
 
-let sourceFile = null;
-let outputBlob = null;
-let outputUrl = null;
-let sourceUrl = null;
-let fallbackDecodeUrl = null;
+let sourceFile: File | null = null;
+let outputBlob: Blob | null = null;
+let outputUrl: string | null = null;
+let sourceUrl: string | null = null;
+let fallbackDecodeUrl: string | null = null;
 let compressionId = 0;
 
 type DecodedImage = ImageBitmap | HTMLImageElement;
