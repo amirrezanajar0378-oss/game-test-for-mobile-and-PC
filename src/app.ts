@@ -67,22 +67,29 @@ dropzone.onkeydown = (event: KeyboardEvent) => {
   }
 };
 
-["dragenter", "dragover"].forEach((eventName) => {
-  dropzone.addEventListener(eventName, (event: DragEvent) => {
-    event.preventDefault();
-    dropzone.classList.add("drag");
-  });
+dropzone.addEventListener("dragenter", (event: DragEvent) => {
+  event.preventDefault();
+  dropzone.classList.add("drag");
 });
 
-["dragleave", "drop"].forEach((eventName) => {
-  dropzone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    dropzone.classList.remove("drag");
-  });
+dropzone.addEventListener("dragover", (event: DragEvent) => {
+  event.preventDefault();
+  dropzone.classList.add("drag");
+});
+
+dropzone.addEventListener("dragleave", (event: DragEvent) => {
+  event.preventDefault();
+  dropzone.classList.remove("drag");
 });
 
 dropzone.addEventListener("drop", (event: DragEvent) => {
-  const file = event.dataTransfer.files && event.dataTransfer.files[0];
+  event.preventDefault();
+  dropzone.classList.remove("drag");
+});
+
+dropzone.addEventListener("drop", (event: DragEvent) => {
+  event.preventDefault();
+  const file = event.dataTransfer?.files?.[0];
   if (file) loadFile(file);
 });
 
@@ -167,7 +174,7 @@ async function decode(file: File): Promise<DecodedImage> {
 
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error("IMAGE_DECODE_FAILED"));
-    image.src = fallbackDecodeUrl;
+    image.src = fallbackDecodeUrl!;
   });
 }
 
